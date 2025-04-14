@@ -25,8 +25,8 @@ function Projects() {
   return (
     <div className="projects-page">
       <div className="container">
-        <h2 className="section-title">Featured Projects</h2>
-        
+        <h2>Featured Projects</h2>
+
         <div className="projects-grid">
           {projects.map((project, index) => (
             <div 
@@ -43,7 +43,7 @@ function Projects() {
                   />
                 </div>
                 <div className="project-content">
-                  <h3>{project.title}</h3>
+                  <h3 className="project-heading">{project.title}</h3>
                   <p>{project.description}</p>
                 </div>
               </div>
