@@ -1,14 +1,19 @@
-// Created by Hrishikesh Kindre for PortfolioAppProject
-
 import React, { useState, useRef } from 'react';
 import emailjs from 'emailjs-com';
-import '../styles/contact.css'; // Updated CSS file
+import '../styles/contact.css';
 
 function Contact() {
   const [loading, setLoading] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [showToast, setShowToast] = useState(false);
   const formRef = useRef();
+
+  // Make sure these are defined in your .env file
+  const emailJsConfig = {
+    serviceId: process.env.REACT_APP_EMAILJS_SERVICE_ID || 'YOUR_SERVICE_ID',
+    templateId: process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'YOUR_TEMPLATE_ID',
+    userId: process.env.REACT_APP_EMAILJS_USER_ID || 'YOUR_USER_ID'
+  };
 
   const showTemporaryToast = (message) => {
     setToastMsg(message);
@@ -21,6 +26,8 @@ function Contact() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validate email first
     const formData = new FormData(formRef.current);
     const email = formData.get('email');
 
@@ -29,20 +36,28 @@ function Contact() {
       return;
     }
 
+    // Validate EmailJS configuration
+    if (!emailJsConfig.serviceId || !emailJsConfig.templateId || !emailJsConfig.userId) {
+      showTemporaryToast('Email service is not properly configured.');
+      console.error('EmailJS configuration missing:', emailJsConfig);
+      return;
+    }
+
     setLoading(true);
 
     emailjs.sendForm(
-      process.env.REACT_APP_EMAILJS_SERVICE_ID,
-      process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
+      emailJsConfig.serviceId,
+      emailJsConfig.templateId,
       formRef.current,
-      process.env.REACT_APP_EMAILJS_USER_ID
+      emailJsConfig.userId
     ).then(
       () => {
         showTemporaryToast('Message sent successfully!');
         formRef.current.reset();
       },
-      () => {
-        showTemporaryToast('Something went wrong. Please try again later.');
+      (error) => {
+        console.error('EmailJS Error:', error);
+        showTemporaryToast('Failed to send message. Please try again later.');
       }
     ).finally(() => setLoading(false));
   };
@@ -101,7 +116,7 @@ function Contact() {
         </div>
       </div>
 
-      {/* Toast Notification - CSS animated */}
+      {/* Toast Notification */}
       <div className={`toast ${showToast ? 'visible' : ''}`}>
         <div className="toast-content">
           <p>{toastMsg}</p>
